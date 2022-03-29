@@ -1,5 +1,4 @@
 import os
-import logging
 
 import redis
 
@@ -18,7 +17,6 @@ from moltin_api import (
     remove_cart_item,
     create_customer,
 )
-
 
 _database = None
 
@@ -273,9 +271,7 @@ def handle_users_reply(bot, update):
         "WAITING_EMAIL": waiting_email,
     }
     state_handler = states_functions[user_state]
-    # Если вы вдруг не заметите, что python-telegram-bot перехватывает ошибки.
-    # Оставляю этот try...except, чтобы код не падал молча.
-    # Этот фрагмент можно переписать.
+
     try:
         next_state = state_handler(bot, update)
         db.set(chat_id, next_state)
