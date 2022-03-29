@@ -71,7 +71,7 @@ def send_total_cart_message(chat_id, bot, query):
     )
 
 
-def start(bot, update):
+def send_initial_menu(chat_id, bot):
     keyboard = []
 
     fish_shop_goods = fetch_fish_shop_goods()
@@ -88,7 +88,18 @@ def start(bot, update):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text("Please choose:", reply_markup=reply_markup)
+    bot.send_message(
+        chat_id=chat_id,
+        text="Выберите:",
+        reply_markup=reply_markup,
+    )
+
+
+def start(bot, update):
+    query = update.callback_query
+    chat_id = update.effective_chat.id
+
+    send_initial_menu(chat_id, bot)
 
     return "HANDLE_MENU"
 
@@ -168,6 +179,11 @@ def handle_description(bot, update):
             message_id=query.message.message_id,
         )
     elif query.data == "cart":
+        bot.deleteMessage(
+            chat_id=chat_id,
+            message_id=query.message.message_id,
+        )
+
         send_total_cart_message(chat_id, bot, query)
 
         return "HANDLE_CART"
@@ -192,12 +208,17 @@ def handle_cart(bot, update):
     pprint(f"handle_cart: {query.data}")
 
     if query.data == "menu":
-        pass
+        bot.deleteMessage(
+            chat_id=chat_id,
+            message_id=query.message.message_id,
+        )
+        send_initial_menu(chat_id, bot)
+        return "HANDLE_MENU"
     else:
         remove_cart_item(chat_id, query.data)
         send_total_cart_message(chat_id, bot, query)
 
-    return "HANDLE_MENU"
+    return "HANDLE_CART"
 
 
 def handle_users_reply(bot, update):
