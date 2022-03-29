@@ -55,7 +55,10 @@ def send_total_cart_message(chat_id, bot, query):
         f"Total: {cart_total['display_price']['with_tax']['formatted']}"
     )
 
-    keyboard.append([InlineKeyboardButton("В меню", callback_data="menu")])
+    keyboard.append(
+        [InlineKeyboardButton("Оплатить", callback_data="payment")],
+        [InlineKeyboardButton("В меню", callback_data="menu")],
+    )
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -214,11 +217,22 @@ def handle_cart(bot, update):
         )
         send_initial_menu(chat_id, bot)
         return "HANDLE_MENU"
+    elif query.data == "payment":
+        bot.send_message(
+            chat_id=chat_id,
+            text="Введите адрес электронной почты:",
+            reply_markup=reply_markup,
+        )
+        return "WAITING_EMAIL"
     else:
         remove_cart_item(chat_id, query.data)
         send_total_cart_message(chat_id, bot, query)
 
     return "HANDLE_CART"
+
+
+def waiting_email(bot, update):
+    pass
 
 
 def handle_users_reply(bot, update):
