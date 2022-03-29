@@ -1,8 +1,6 @@
 import os
 import logging
 
-from pprint import pprint
-
 import redis
 
 from dotenv import load_dotenv
@@ -18,6 +16,7 @@ from moltin_api import (
     get_product_image_url,
     get_cart_total,
     remove_cart_item,
+    create_customer,
 )
 
 
@@ -110,8 +109,6 @@ def handle_menu(bot, update):
     query = update.callback_query
     chat_id = query.message.chat_id
 
-    pprint(f"handle_menu: {query.data}")
-
     if query.data == "cart":
         send_total_cart_message(chat_id, bot, query)
 
@@ -173,8 +170,6 @@ def handle_description(bot, update):
     query = update.callback_query
     chat_id = query.message.chat_id
 
-    pprint(f"handle_description: {query.data}")
-
     if query.data == "back":
         bot.deleteMessage(
             chat_id=chat_id,
@@ -207,8 +202,6 @@ def handle_cart(bot, update):
     query = update.callback_query
     chat_id = query.message.chat_id
 
-    pprint(f"handle_cart: {query.data}")
-
     if query.data == "menu":
         bot.deleteMessage(
             chat_id=chat_id,
@@ -231,6 +224,7 @@ def handle_cart(bot, update):
 
 def waiting_email(bot, update):
     user_email = update.message.text
+    user_id = update.message.chat_id
 
     is_email_valid = validate_email(
         email_address=user_email,
@@ -244,26 +238,19 @@ def waiting_email(bot, update):
         update.message.reply_text(
             f"Вы ввели адрес электронной почты: {user_email}"
         )
+
+        create_customer(str(user_id), user_email)
+
+        return "START"
     else:
         update.message.reply_text(
             "Вы ввели некорректный адрес электронной почты"
         )
+
         return "WAITING_EMAIL"
 
 
 def handle_users_reply(bot, update):
-    """
-    Функция, которая запускается при любом сообщении от пользователя и решает как его обработать.
-    Эта функция запускается в ответ на эти действия пользователя:
-        * Нажатие на inline-кнопку в боте
-        * Отправка сообщения боту
-        * Отправка команды боту
-    Она получает стейт пользователя из базы данных и запускает соответствующую функцию-обработчик (хэндлер).
-    Функция-обработчик возвращает следующее состояние, которое записывается в базу данных.
-    Если пользователь только начал пользоваться ботом, Telegram форсит его написать "/start",
-    поэтому по этой фразе выставляется стартовое состояние.
-    Если пользователь захочет начать общение с ботом заново, он также может воспользоваться этой командой.
-    """
     db = get_database_connection()
     if update.message:
         user_reply = update.message.text
@@ -297,9 +284,6 @@ def handle_users_reply(bot, update):
 
 
 def get_database_connection():
-    """
-    Возвращает конекшн с базой данных Redis, либо создаёт новый, если он ещё не создан.
-    """
     global _database
     if _database is None:
         database_password = os.getenv("REDIS_PASS")
