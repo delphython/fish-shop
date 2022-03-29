@@ -134,7 +134,8 @@ def handle_menu(bot, update):
         image_id = (
             fish_shop_good.get("relationships", None)
             .get("main_image", None)
-            .get("data", None)["id"]
+            .get("data", None)
+            .get("id", None)
         )
 
         for good_quantity in range(1, max_good_quantity + 1):
@@ -153,13 +154,20 @@ def handle_menu(bot, update):
 
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        bot.send_photo(
-            chat_id=chat_id,
-            photo=get_product_image_url(image_id)["data"]["link"]["href"],
-            caption=message_text,
-            parse_mode="html",
-            reply_markup=reply_markup,
-        )
+        if image_id:
+            bot.send_photo(
+                chat_id=chat_id,
+                photo=get_product_image_url(image_id)["data"]["link"]["href"],
+                caption=message_text,
+                parse_mode="html",
+                reply_markup=reply_markup,
+            )
+        else:
+            bot.send_message(
+                chat_id=chat_id,
+                text=message_text,
+                reply_markup=reply_markup,
+            )
 
     return "HANDLE_DESCRIPTION"
 
