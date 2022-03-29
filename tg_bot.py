@@ -2,7 +2,6 @@ import os
 import logging
 
 from pprint import pprint
-from textwrap import dedent
 
 import redis
 
@@ -10,6 +9,7 @@ from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
+from validate_email import validate_email
 
 from moltin_api import (
     fetch_fish_shop_goods,
@@ -56,9 +56,9 @@ def send_total_cart_message(chat_id, bot, query):
     )
 
     keyboard.append(
-        [InlineKeyboardButton("Оплатить", callback_data="payment")],
-        [InlineKeyboardButton("В меню", callback_data="menu")],
+        [InlineKeyboardButton("Оплатить", callback_data="payment")]
     )
+    keyboard.append([InlineKeyboardButton("В меню", callback_data="menu")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -99,7 +99,6 @@ def send_initial_menu(chat_id, bot):
 
 
 def start(bot, update):
-    query = update.callback_query
     chat_id = update.effective_chat.id
 
     send_initial_menu(chat_id, bot)
@@ -221,7 +220,6 @@ def handle_cart(bot, update):
         bot.send_message(
             chat_id=chat_id,
             text="Введите адрес электронной почты:",
-            reply_markup=reply_markup,
         )
         return "WAITING_EMAIL"
     else:
@@ -232,7 +230,25 @@ def handle_cart(bot, update):
 
 
 def waiting_email(bot, update):
-    pass
+    user_email = update.message.text
+
+    is_email_valid = validate_email(
+        email_address=user_email,
+        check_format=True,
+        check_blacklist=False,
+        check_dns=False,
+        check_smtp=False,
+    )
+
+    if is_email_valid:
+        update.message.reply_text(
+            f"Вы ввели адрес электронной почты: {user_email}"
+        )
+    else:
+        update.message.reply_text(
+            "Вы ввели некорректный адрес электронной почты"
+        )
+        return "WAITING_EMAIL"
 
 
 def handle_users_reply(bot, update):
@@ -267,6 +283,7 @@ def handle_users_reply(bot, update):
         "HANDLE_MENU": handle_menu,
         "HANDLE_DESCRIPTION": handle_description,
         "HANDLE_CART": handle_cart,
+        "WAITING_EMAIL": waiting_email,
     }
     state_handler = states_functions[user_state]
     # Если вы вдруг не заметите, что python-telegram-bot перехватывает ошибки.
