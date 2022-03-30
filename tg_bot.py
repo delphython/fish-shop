@@ -289,7 +289,7 @@ def handle_users_reply(bot, update):
 
 def get_database_connection():
     global _database
-    if _database is None:
+    if not _database:
         database_password = os.getenv("REDIS_PASS")
         database_host = os.getenv("REDIS_HOST")
         database_port = os.getenv("REDIS_PORT")
