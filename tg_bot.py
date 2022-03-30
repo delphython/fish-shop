@@ -10,6 +10,7 @@ from validate_email import validate_email
 
 from moltin_api import (
     fetch_fish_shop_goods,
+    fetch_fish_shop_good,
     add_good_to_cart,
     get_cart_items,
     get_product_image_url,
@@ -117,7 +118,7 @@ def handle_menu(bot, update):
 
         good_id = query.data
 
-        fish_shop_good = fetch_fish_shop_goods(good_id)["data"]
+        fish_shop_good = fetch_fish_shop_good(good_id)["data"]
 
         good_price = fish_shop_good["meta"]["display_price"]["with_tax"][
             "formatted"
