@@ -10,99 +10,25 @@ from textwrap import dedent
 from validate_email import validate_email
 
 from moltin_api import (
-    fetch_fish_shop_goods,
     fetch_fish_shop_good,
     add_good_to_cart,
-    get_cart_items,
     get_product_image_url,
-    get_cart_total,
     remove_cart_item,
     create_customer,
+)
+
+from send_messages import (
+    send_total_cart_message,
+    send_initial_message,
 )
 
 _database = None
 
 
-def send_total_cart_message(chat_id, bot, query):
-    message_text = ""
-    keyboard = []
-
-    cart_items = get_cart_items(chat_id)
-
-    for cart_item in cart_items["data"]:
-        display_price = cart_item["meta"]["display_price"]["with_tax"]
-
-        message_text += dedent(
-            f"""\
-        {cart_item['name']}
-        {cart_item['description']}
-        {display_price['unit']['formatted']} per kg
-        {cart_item['quantity']} kg in cart for {display_price['value']['formatted']}
-
-        """
-        )
-
-        keyboard.append(
-            [
-                InlineKeyboardButton(
-                    f"Убрать из корзины {cart_item['name']}",
-                    callback_data=cart_item["id"],
-                )
-            ]
-        )
-
-    cart_total = get_cart_total(chat_id)["data"]["meta"]
-    message_text += (
-        f"Total: {cart_total['display_price']['with_tax']['formatted']}"
-    )
-
-    keyboard.append(
-        [InlineKeyboardButton("Оплатить", callback_data="payment")]
-    )
-    keyboard.append([InlineKeyboardButton("В меню", callback_data="menu")])
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    bot.send_message(
-        chat_id=chat_id,
-        text=message_text,
-        reply_markup=reply_markup,
-    )
-
-    bot.delete_message(
-        chat_id=chat_id,
-        message_id=query.message.message_id,
-    )
-
-
-def send_initial_menu(chat_id, bot):
-    keyboard = []
-
-    fish_shop_goods = fetch_fish_shop_goods()
-
-    for fish_shop_good in fish_shop_goods["data"]:
-        keyboard.append(
-            [
-                InlineKeyboardButton(
-                    fish_shop_good["name"], callback_data=fish_shop_good["id"]
-                )
-            ]
-        )
-    keyboard.append([InlineKeyboardButton("Корзина", callback_data="cart")])
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    bot.send_message(
-        chat_id=chat_id,
-        text="Выберите:",
-        reply_markup=reply_markup,
-    )
-
-
 def start(bot, update):
     chat_id = update.effective_chat.id
 
-    send_initial_menu(chat_id, bot)
+    send_initial_message(chat_id, bot)
 
     return "HANDLE_MENU"
 
@@ -213,7 +139,7 @@ def handle_cart(bot, update):
     chat_id = query.message.chat_id
 
     if query.data == "menu":
-        send_initial_menu(chat_id, bot)
+        send_initial_message(chat_id, bot)
 
         bot.delete_message(
             chat_id=chat_id,
