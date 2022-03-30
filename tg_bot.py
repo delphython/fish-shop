@@ -60,15 +60,15 @@ def send_total_cart_message(chat_id, bot, query):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    bot.deleteMessage(
-        chat_id=chat_id,
-        message_id=query.message.message_id,
-    )
-
     bot.send_message(
         chat_id=chat_id,
         text=message_text,
         reply_markup=reply_markup,
+    )
+
+    bot.deleteMessage(
+        chat_id=chat_id,
+        message_id=query.message.message_id,
     )
 
 
@@ -170,6 +170,11 @@ def handle_menu(bot, update):
                 reply_markup=reply_markup,
             )
 
+        bot.deleteMessage(
+            chat_id=chat_id,
+            message_id=query.message.message_id,
+        )
+
     return "HANDLE_DESCRIPTION"
 
 
@@ -178,16 +183,8 @@ def handle_description(bot, update):
     chat_id = query.message.chat_id
 
     if query.data == "back":
-        bot.deleteMessage(
-            chat_id=chat_id,
-            message_id=query.message.message_id,
-        )
+        send_total_cart_message(chat_id, bot, query)
     elif query.data == "cart":
-        bot.deleteMessage(
-            chat_id=chat_id,
-            message_id=query.message.message_id,
-        )
-
         send_total_cart_message(chat_id, bot, query)
 
         return "HANDLE_CART"
@@ -210,11 +207,13 @@ def handle_cart(bot, update):
     chat_id = query.message.chat_id
 
     if query.data == "menu":
+        send_initial_menu(chat_id, bot)
+
         bot.deleteMessage(
             chat_id=chat_id,
             message_id=query.message.message_id,
         )
-        send_initial_menu(chat_id, bot)
+
         return "HANDLE_MENU"
     elif query.data == "payment":
         bot.send_message(
