@@ -2,8 +2,6 @@ import os
 
 import requests
 
-from dotenv import load_dotenv
-
 
 def get_elasticpath_headers():
     elasticpath_client_id = os.environ["ELASTICPATH_CLIENTD_ID"]
