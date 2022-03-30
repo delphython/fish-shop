@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
+from textwrap import dedent
 from validate_email import validate_email
 
 from moltin_api import (
@@ -31,12 +32,14 @@ def send_total_cart_message(chat_id, bot, query):
     for cart_item in cart_items["data"]:
         display_price = cart_item["meta"]["display_price"]["with_tax"]
 
-        message_text += (
-            f"{cart_item['name']}\n"
-            f"{cart_item['description']}\n"
-            f"{display_price['unit']['formatted']} per kg\n"
-            f"{cart_item['quantity']} kg in cart for "
-            f"{display_price['value']['formatted']}\n\n"
+        message_text += dedent(
+            f"""\
+        {cart_item['name']}
+        {cart_item['description']}
+        {display_price['unit']['formatted']} per kg
+        {cart_item['quantity']} kg in cart for {display_price['value']['formatted']}
+
+        """
         )
 
         keyboard.append(
@@ -125,11 +128,14 @@ def handle_menu(bot, update):
         ]
         good_weight = fish_shop_good["weight"]["kg"]
 
-        message_text = (
-            f"{fish_shop_good['name']}\n\n"
-            f"{good_price} per {good_weight} kg\n"
-            f"{fish_shop_good['meta']['stock']['level']} kg in stock\n\n"
-            f"{fish_shop_good['description']}"
+        message_text = dedent(
+            f"""\
+            {fish_shop_good['name']}
+
+            {good_price} per {good_weight} kg
+            {fish_shop_good['meta']['stock']['level']} kg in stock
+
+            {fish_shop_good['description']}"""
         )
 
         image_id = (
