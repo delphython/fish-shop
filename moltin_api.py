@@ -25,14 +25,21 @@ def get_elasticpath_headers():
     }
 
 
-def fetch_fish_shop_goods(good_id=None):
+def fetch_fish_shop_goods():
     headers = get_elasticpath_headers()
 
-    fish_shop_url = (
-        f"https://api.moltin.com/v2/products/{good_id}"
-        if good_id
-        else "https://api.moltin.com/v2/products"
-    )
+    fish_shop_url = "https://api.moltin.com/v2/products"
+
+    response = requests.get(fish_shop_url, headers=headers)
+    response.raise_for_status()
+
+    return response.json()
+
+
+def fetch_fish_shop_good(good_id):
+    headers = get_elasticpath_headers()
+
+    fish_shop_url = f"https://api.moltin.com/v2/products/{good_id}"
 
     response = requests.get(fish_shop_url, headers=headers)
     response.raise_for_status()
