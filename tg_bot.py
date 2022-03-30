@@ -69,7 +69,7 @@ def send_total_cart_message(chat_id, bot, query):
         reply_markup=reply_markup,
     )
 
-    bot.deleteMessage(
+    bot.delete_message(
         chat_id=chat_id,
         message_id=query.message.message_id,
     )
@@ -176,7 +176,7 @@ def handle_menu(bot, update):
                 reply_markup=reply_markup,
             )
 
-        bot.deleteMessage(
+        bot.delete_message(
             chat_id=chat_id,
             message_id=query.message.message_id,
         )
@@ -215,7 +215,7 @@ def handle_cart(bot, update):
     if query.data == "menu":
         send_initial_menu(chat_id, bot)
 
-        bot.deleteMessage(
+        bot.delete_message(
             chat_id=chat_id,
             message_id=query.message.message_id,
         )
