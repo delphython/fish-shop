@@ -148,7 +148,3 @@ def create_customer(user_name, user_email):
     response.raise_for_status()
 
     return response.json()
-
-
-if __name__ == "__main__":
-    load_dotenv()
