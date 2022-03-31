@@ -1,9 +1,13 @@
 import os
+import time
 
 import requests
 
 
-def get_elasticpath_headers():
+_moltin_token = None
+
+
+def get_elasticpath_access_token():
     elasticpath_client_id = os.environ["ELASTICPATH_CLIENTD_ID"]
     elasticpath_client_secret = os.environ["ELASTICPATH_CLIENTD_SECRET"]
 
@@ -17,8 +21,21 @@ def get_elasticpath_headers():
     response = requests.post(elasticpath_api_key_url, data=data)
     response.raise_for_status()
 
+    return response.json()
+
+
+def get_elasticpath_headers():
+    global _moltin_token
+    global _token_expires
+
+    if not _moltin_token or time.time() > _token_expires:
+        access_token = get_elasticpath_access_token()
+
+        _moltin_token = access_token["access_token"]
+        _token_expires = access_token["expires"]
+
     return {
-        "Authorization": f"Bearer {response.json()['access_token']}",
+        "Authorization": f"Bearer {_moltin_token}",
         "X-MOLTIN_CURRENCY": "USD",
     }
 
