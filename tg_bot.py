@@ -65,9 +65,9 @@ def handle_menu(bot, update):
         )
 
         image_id = (
-            fish_shop_good.get("relationships", {"default": None})
-            .get("main_image", {"default": None})
-            .get("data", {"default": None})
+            fish_shop_good.get("relationships", {})
+            .get("main_image", {})
+            .get("data", {})
             .get("id")
         )
 
