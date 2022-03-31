@@ -65,10 +65,10 @@ def handle_menu(bot, update):
         )
 
         image_id = (
-            fish_shop_good.get("relationships", None)
-            .get("main_image", None)
-            .get("data", None)
-            .get("id", None)
+            fish_shop_good.get("relationships", {"default": None})
+            .get("main_image", {"default": None})
+            .get("data", {"default": None})
+            .get("id")
         )
 
         for good_quantity in range(1, max_good_quantity + 1):
